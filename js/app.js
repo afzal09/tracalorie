@@ -83,8 +83,7 @@ class Meal {
         this.id = Math.random().toString(16).slice(2);
         this.name = name;
         this.calories = calories;
-        
-    }
+    } 
 }
 class Workouts{
     constructor(name,calories){
@@ -95,10 +94,42 @@ class Workouts{
     }
 }
 
-const tracker = new CalorieTracker();
-const breakfast = new Meal('Bread Jam', 4000);
-const lunch = new Meal('lunch',600)
-const workout = new Workouts('Morning run',320);
-tracker.addMeal(breakfast);
-tracker.addMeal(lunch);
-tracker.addWorkouts(workout);
+// main App class 
+
+class App {
+    constructor() {
+        this._tracker = new CalorieTracker();
+        document.querySelector('#meal-form').addEventListener('submit', this._newMeal.bind(this))
+        document.querySelector('#workout-form').addEventListener('submit', this._newWorkout.bind(this))
+    }
+    _newMeal(e){
+        e.preventDefault();
+        const item = document.querySelector('#meal-name');
+        const calorie = document.querySelector('#meal-calories');
+        if (item.value === '' || calorie.value === '') { alert('Enter both fields')}
+        const meal = new Meal(item.value, +calorie.value)
+        this._tracker.addMeal(meal);
+        item.value = '';
+        calorie.value = '';    
+        const collapse = document.getElementById('collapse-meal');
+        const bsCollapse = new bootstrap.Collapse(collapse,{
+            toggle:true
+        })  
+    }
+    _newWorkout(e){
+        e.preventDefault();
+        const Workout = document.querySelector('#workout-name');
+        const calorie = document.querySelector('#workout-calories');
+        if (Workout.value === '' || calorie.value == '') { alert('Enter both fields')};
+        const workout = new Workouts(Workout.value, +calorie.value)
+        this._tracker.addWorkouts(workout);
+        Workout.value = '';
+        calorie.value = '';  
+        const collapse = document.getElementById('collapse-workout');
+        const bsCollapse = new bootstrap.Collapse(collapse,{
+            toggle:true
+        })      
+    }
+}
+
+const app = new App();
