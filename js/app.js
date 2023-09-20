@@ -99,36 +99,27 @@ class Workouts{
 class App {
     constructor() {
         this._tracker = new CalorieTracker();
-        document.querySelector('#meal-form').addEventListener('submit', this._newMeal.bind(this))
-        document.querySelector('#workout-form').addEventListener('submit', this._newWorkout.bind(this))
+        document.querySelector('#meal-form').addEventListener('submit', this._newItem.bind(this,'meal'));
+        document.querySelector('#workout-form').addEventListener('submit', this._newItem.bind(this,'workout'));
     }
-    _newMeal(e){
+    _newItem(type,e){
         e.preventDefault();
-        const item = document.querySelector('#meal-name');
-        const calorie = document.querySelector('#meal-calories');
-        if (item.value === '' || calorie.value === '') { alert('Enter both fields')}
-        const meal = new Meal(item.value, +calorie.value)
-        this._tracker.addMeal(meal);
+        const item = document.querySelector(`#${type}-name`);
+        const calorie = document.querySelector(`#${type}-calories`);
+        if (item.value === '' || calorie.value === '') { alert('Enter both fields')};
+        if (type === 'meal') {
+            const meal = new Meal(item.value, +calorie.value)
+            this._tracker.addMeal(meal);
+        } else {
+            const workout = new Workouts(item.value, +calorie.value)
+            this._tracker.addWorkouts(workout);
+        }
         item.value = '';
         calorie.value = '';    
         const collapse = document.getElementById('collapse-meal');
         const bsCollapse = new bootstrap.Collapse(collapse,{
             toggle:true
         })  
-    }
-    _newWorkout(e){
-        e.preventDefault();
-        const Workout = document.querySelector('#workout-name');
-        const calorie = document.querySelector('#workout-calories');
-        if (Workout.value === '' || calorie.value == '') { alert('Enter both fields')};
-        const workout = new Workouts(Workout.value, +calorie.value)
-        this._tracker.addWorkouts(workout);
-        Workout.value = '';
-        calorie.value = '';  
-        const collapse = document.getElementById('collapse-workout');
-        const bsCollapse = new bootstrap.Collapse(collapse,{
-            toggle:true
-        })      
     }
 }
 
