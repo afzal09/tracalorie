@@ -1,7 +1,7 @@
 class CalorieTracker {
     // constructor function
     constructor() {
-        this._calorieLimit = 2000;
+        this._calorieLimit = 0;
         this._totalCalories = 0;
         this._meals = [];
         this._workouts = [];
@@ -19,7 +19,6 @@ class CalorieTracker {
         this._workouts.push(workout);
         this._totalCalories -= workout.calories;
         this._displayWorkout(workout);
-        this._render();
     }
     removeMeal(id) {
         const index = this._meals.findIndex((meals) => meals.id === id);
@@ -44,6 +43,11 @@ class CalorieTracker {
         this._totalCalories = 0;
         this._meals = [];
         this._workouts = [];
+        this._render();
+    }
+    setLimit(limit) {
+        this._calorieLimit = limit;
+        this._dislpayCalorieLimit();
         this._render();
     }
     // Private methods //
@@ -173,6 +177,8 @@ class App {
         document.querySelector('#filter-meals').addEventListener('keyup',this._filterItems.bind(this,'meal'));
         document.querySelector('#filter-workouts').addEventListener('keyup',this._filterItems.bind(this,'workout'));
         document.querySelector('#reset').addEventListener('click',this._reset.bind(this));
+        document.querySelector('#limit-form').addEventListener('submit',this._setLimit.bind(this));
+
     }
     _newItem(type,e){
         e.preventDefault();
@@ -229,6 +235,15 @@ class App {
         document.getElementById('filter-workouts').value = '';
         }
 }
+    _setLimit(e){
+        e.preventDefault();
+        const limit = document.getElementById('limit');
+        this._tracker.setLimit(+limit.value);
+        limit.value = '';
+        const modalEl = document.getElementById('limit-modal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+    }
 }
 
 const app = new App();
