@@ -40,7 +40,12 @@ class CalorieTracker {
           this._render();
         }
     }
-
+    reset(){
+        this._totalCalories = 0;
+        this._meals = [];
+        this._workouts = [];
+        this._render();
+    }
     // Private methods //
     _dislpayCalorieLimit () {   // dynamic calorie limit diplayer
         const CalorieLimit = document.querySelector('#calories-limit');
@@ -66,7 +71,6 @@ class CalorieTracker {
 
     _displaycaloriesRemaining () {  // dynamic calorie remaning diplayer
         const calRemaining = this._calorieLimit - this._totalCalories;
-        console.log(calRemaining);
         const caloriesRemaining = document.querySelector('#calories-remaining');
         const progressEl = document.querySelector('#calorie-progress');
         caloriesRemaining.innerHTML = calRemaining;
@@ -166,6 +170,9 @@ class App {
         document.querySelector('#workout-form').addEventListener('submit', this._newItem.bind(this,'workout'));        
         document.querySelector('#meal-items').addEventListener('click', this._removeItem.bind(this,'meal'));
         document.querySelector('#workout-items').addEventListener('click', this._removeItem.bind(this,'workout'));
+        document.querySelector('#filter-meals').addEventListener('keyup',this._filterItems.bind(this,'meal'));
+        document.querySelector('#filter-workouts').addEventListener('keyup',this._filterItems.bind(this,'workout'));
+        document.querySelector('#reset').addEventListener('click',this._reset.bind(this));
     }
     _newItem(type,e){
         e.preventDefault();
@@ -200,6 +207,28 @@ class App {
             }
         }
     }
+    _filterItems(type, e){
+        const text = e.target.value.toLowerCase();
+        document.querySelectorAll(`#${type}-items .card`).forEach( item => {
+            console.log(item);
+            const items = item.firstElementChild.firstElementChild.textContent;
+            console.log(items);
+            if(items.toLowerCase().indexOf(text) !== -1) {
+                item.style.display = 'block';
+            }else {
+                item.style.display = 'none';
+            }
+        });
+    };
+    _reset() {
+        if(confirm("Are you sure all your saved data will be removed")) {
+        this._tracker.reset();
+        document.getElementById('meal-items').innerHTML = '';
+        document.getElementById('workout-items').innerHTML = '';
+        document.getElementById('filter-meals').value = '';
+        document.getElementById('filter-workouts').value = '';
+        }
+}
 }
 
 const app = new App();
