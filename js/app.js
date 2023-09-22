@@ -53,6 +53,7 @@ class CalorieTracker {
         this._totalCalories = 0;
         this._meals = [];
         this._workouts = [];
+        Storage.clearItem();
         this._render();
     }
     setLimit(limit) {
@@ -252,6 +253,11 @@ class Storage {
             }
         });
         localStorage.setItem('workouts',JSON.stringify(workouts));
+    }
+    static clearItem(){
+        localStorage.removeItem('totalCalories');
+        localStorage.removeItem('meals');
+        localStorage.removeItem('workouts');
     }
 }
 // main App class 
