@@ -4,9 +4,10 @@ class CalorieTracker {
         this._calorieLimit = Storage.getLimit();
         this._totalCalories = Storage.getTotalCalorie(0);
         this._meals = Storage.getmeals();
-        this._workouts = [];
+        this._workouts = Storage.getWorkouts();
         this._dislpayCalorieLimit();
         this._displayCalorieConsumed();
+        this._render();
     }
     // public methods // 
     addMeal(meal){
@@ -20,8 +21,10 @@ class CalorieTracker {
     addWorkouts(workout){
         this._workouts.push(workout);
         this._totalCalories -= workout.calories;
-        Storage.setTotalCalorie(this._totalCalories)
+        Storage.setTotalCalorie(this._totalCalories);
+        Storage.setWorkouts(workout);
         this._displayWorkout(workout);
+        this._render();
     }
     removeMeal(id) {
         const index = this._meals.findIndex((meals) => meals.id === id);
@@ -29,7 +32,9 @@ class CalorieTracker {
           const meal = this._meals[index];
           this._meals.splice(index, 1);
           this._totalCalories -= meal.calories;
-          Storage.setTotalCalorie(this._totalCalories)
+          Storage.setTotalCalorie(this._totalCalories);
+          Storage.removeMeal(id);
+          console.log(id);
           this._render();
         }
     }
@@ -39,7 +44,8 @@ class CalorieTracker {
           const meal = this._workouts[index];
           this._workouts.splice(index, 1);
           this._totalCalories -= meal.calories;
-          Storage.setTotalCalorie(this._totalCalories)
+          Storage.setTotalCalorie(this._totalCalories);
+          Storage.removeWorkouts(id);
           this._render();
         }
     }
@@ -57,6 +63,7 @@ class CalorieTracker {
     }
     loadItems(){
         this._meals.forEach(meal => this._displayMeal(meal));
+        this._workouts.forEach(workout => this._displayWorkout(workout));
     }
     // Private methods //
     _dislpayCalorieLimit () {   // dynamic calorie limit diplayer
@@ -174,9 +181,6 @@ class Workouts{
     }
 }
 class Storage {
-    static setLimit(calorieLimit){
-        localStorage.setItem('calorieLimit',calorieLimit);
-    }
     static getLimit(defaultLimit = 2000) {
         let calorieLimit;
         if(localStorage.getItem('calorieLimit') === null) {
@@ -185,6 +189,9 @@ class Storage {
             calorieLimit = +localStorage.getItem('calorieLimit')
         }
         return calorieLimit;
+    }
+    static setLimit(calorieLimit){
+        localStorage.setItem('calorieLimit',calorieLimit);
     }
     static getTotalCalorie(defaultCalorie = 0) {
         let totalCalories;
@@ -212,6 +219,40 @@ class Storage {
         meals.push(meal);
         localStorage.setItem('meals',JSON.stringify(meals))
     }
+    static removeMeal(id){
+        const meals = Storage.getmeals();
+        console.log(meals);
+        meals.forEach((meal,index) => {
+            if(meal.id === id){
+                meals.splice(index,1);
+            }
+        });
+        localStorage.setItem('meals',JSON.stringify(meals))
+    }
+    
+    static getWorkouts(){
+        let workouts;
+        if(localStorage.getItem('workouts') === null) {
+            workouts = [];
+        }else{
+            workouts = JSON.parse(localStorage.getItem('workouts'));
+        }
+        return workouts;
+    }
+    static setWorkouts(workout) {
+        const workouts = Storage.getWorkouts();
+        workouts.push(workout);
+        localStorage.setItem('workouts',JSON.stringify(workouts))
+    };
+    static removeWorkouts(id){
+        const workouts = Storage.getWorkouts();
+        workouts.forEach((workout,index) => {
+            if(workout.id === id){
+                workouts.splice(index,1);
+            }
+        });
+        localStorage.setItem('workouts',JSON.stringify(workouts));
+    }
 }
 // main App class 
 class App {
@@ -219,7 +260,6 @@ class App {
         this._tracker = new CalorieTracker();
         this._loadEventListenrs();
         this._tracker.loadItems();
-
     }
     _loadEventListenrs(){
         document.querySelector('#meal-form').addEventListener('submit', this._newItem.bind(this,'meal'));
