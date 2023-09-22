@@ -2,8 +2,8 @@ class CalorieTracker {
     // constructor function
     constructor() {
         this._calorieLimit = Storage.getLimit();
-        this._totalCalories = 0;
-        this._meals = [];
+        this._totalCalories = Storage.getTotalCalorie(0);
+        this._meals = Storage.getmeals();
         this._workouts = [];
         this._dislpayCalorieLimit();
         this._displayCalorieConsumed();
@@ -12,21 +12,24 @@ class CalorieTracker {
     addMeal(meal){
         this._meals.push(meal);
         this._totalCalories += meal.calories;
+        Storage.setTotalCalorie(this._totalCalories);
+        Storage.setmeal(meal);
         this._displayMeal(meal);
         this._render();
     }
     addWorkouts(workout){
         this._workouts.push(workout);
         this._totalCalories -= workout.calories;
+        Storage.setTotalCalorie(this._totalCalories)
         this._displayWorkout(workout);
     }
     removeMeal(id) {
         const index = this._meals.findIndex((meals) => meals.id === id);
-        console.log(index);
         if (index !== -1) {
           const meal = this._meals[index];
           this._meals.splice(index, 1);
           this._totalCalories -= meal.calories;
+          Storage.setTotalCalorie(this._totalCalories)
           this._render();
         }
     }
@@ -36,6 +39,7 @@ class CalorieTracker {
           const meal = this._workouts[index];
           this._workouts.splice(index, 1);
           this._totalCalories -= meal.calories;
+          Storage.setTotalCalorie(this._totalCalories)
           this._render();
         }
     }
@@ -50,6 +54,9 @@ class CalorieTracker {
         Storage.setLimit(limit);
         this._dislpayCalorieLimit();
         this._render();
+    }
+    loadItems(){
+        this._meals.forEach(meal => this._displayMeal(meal));
     }
     // Private methods //
     _dislpayCalorieLimit () {   // dynamic calorie limit diplayer
@@ -66,6 +73,7 @@ class CalorieTracker {
         const consumed = this._meals.reduce((total,meals) => total + meals.calories, 0);
         const calorieConsumed = document.querySelector('#calories-consumed');
         calorieConsumed.innerHTML = consumed;
+        this._displayProgressBar();
     }
 
     _displayCalorieBurned () {  // dynamic calorie burned diplayer
@@ -167,7 +175,6 @@ class Workouts{
 }
 class Storage {
     static setLimit(calorieLimit){
-        console.log(calorieLimit);
         localStorage.setItem('calorieLimit',calorieLimit);
     }
     static getLimit(defaultLimit = 2000) {
@@ -179,11 +186,42 @@ class Storage {
         }
         return calorieLimit;
     }
+    static getTotalCalorie(defaultCalorie = 0) {
+        let totalCalories;
+        if(localStorage.getItem('totalCalories') === null) {
+            totalCalories = defaultCalorie;
+        }else{
+            totalCalories = +localStorage.getItem('totalCalories')
+        }
+        return totalCalories;
+    }
+    static setTotalCalorie(calories){
+        localStorage.setItem('totalCalories',calories);
+    }
+    static getmeals(){
+        let meals;
+        if(localStorage.getItem('meals') === null) {
+            meals = [];
+        }else{
+            meals = JSON.parse(localStorage.getItem('meals'));
+        }
+        return meals;
+    }
+    static setmeal(meal) {
+        const meals = Storage.getmeals();
+        meals.push(meal);
+        localStorage.setItem('meals',JSON.stringify(meals))
+    }
 }
 // main App class 
 class App {
     constructor() {
         this._tracker = new CalorieTracker();
+        this._loadEventListenrs();
+        this._tracker.loadItems();
+
+    }
+    _loadEventListenrs(){
         document.querySelector('#meal-form').addEventListener('submit', this._newItem.bind(this,'meal'));
         document.querySelector('#workout-form').addEventListener('submit', this._newItem.bind(this,'workout'));        
         document.querySelector('#meal-items').addEventListener('click', this._removeItem.bind(this,'meal'));
@@ -192,7 +230,6 @@ class App {
         document.querySelector('#filter-workouts').addEventListener('keyup',this._filterItems.bind(this,'workout'));
         document.querySelector('#reset').addEventListener('click',this._reset.bind(this));
         document.querySelector('#limit-form').addEventListener('submit',this._setLimit.bind(this));
-
     }
     _newItem(type,e){
         e.preventDefault();
