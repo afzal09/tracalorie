@@ -35,6 +35,6 @@ Visit the deployed version of Tracalorie at. &nbsp;[**https://tracaloriev1.netli
 
 To run Tracalorie locally, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/your-username/tracalorie.git`
+1. Clone the repository
 
-2. Run in yuor preffered local server
+2. Run in your preffered local web server
